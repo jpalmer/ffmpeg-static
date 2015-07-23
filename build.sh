@@ -36,7 +36,7 @@ mkdir -p "$BUILD_DIR" "$TARGET_DIR"
 
 # NOTE: this is a fetchurl parameter, nothing to do with the current script
 #export TARGET_DIR_DIR="$BUILD_DIR"
-
+TARGET_DIR=$(echo ~/.local)
 echo "#### FFmpeg static build, by STVS SA ####"
 cd $BUILD_DIR
 ../fetchurl "http://www.tortall.net/projects/yasm/releases/yasm-1.3.0.tar.gz"
@@ -62,50 +62,50 @@ make install
 
 echo "*** Building zlib ***"
 cd $BUILD_DIR/zlib*
-./configure --prefix=$TARGET_DIR
+./configure --prefix=$TARGET_DIR --enable-shared 
 make -j $jval
 make install
 
 echo "*** Building bzip2 ***"
 cd $BUILD_DIR/bzip2*
-make
+CFLAGS=-fPIC make
 make install PREFIX=$TARGET_DIR
 
 echo "*** Building libpng ***"
 cd $BUILD_DIR/libpng*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 
 # Ogg before vorbis
 echo "*** Building libogg ***"
 cd $BUILD_DIR/libogg*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 
 # Vorbis before theora
 echo "*** Building libvorbis ***"
 cd $BUILD_DIR/libvorbis*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 
 echo "*** Building libtheora ***"
 cd $BUILD_DIR/libtheora*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 
 echo "*** Building livpx ***"
 cd $BUILD_DIR/libvpx*
-./configure --prefix=$TARGET_DIR --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 
 echo "*** Building faac ***"
 cd $BUILD_DIR/faac*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 # FIXME: gcc incompatibility, does not work with log()
 
 sed -i -e "s|^char \*strcasestr.*|//\0|" common/mp4v2/mpeg4ip.h
@@ -114,26 +114,26 @@ make install
 
 echo "*** Building x264 ***"
 cd $BUILD_DIR/x264*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared --disable-opencl
+./configure --prefix=$TARGET_DIR --enable-shared  --disable-opencl --enable-pic
 make -j $jval
 make install
 
 echo "*** Building xvidcore ***"
 cd "$BUILD_DIR/xvidcore/build/generic"
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 #rm $TARGET_DIR/lib/libxvidcore.so.*
 
 echo "*** Building lame ***"
 cd $BUILD_DIR/lame*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 
 echo "*** Building opus ***"
 cd $BUILD_DIR/opus*
-./configure --prefix=$TARGET_DIR --enable-static --disable-shared
+./configure --prefix=$TARGET_DIR --enable-shared --enable-pic
 make -j $jval
 make install
 
@@ -144,5 +144,5 @@ rm -f "$TARGET_DIR/lib/*.so"
 # FFMpeg
 echo "*** Building FFmpeg ***"
 cd $BUILD_DIR/ffmpeg*
-CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" ./configure --prefix=${OUTPUT_DIR:-$TARGET_DIR} --extra-cflags="-I$TARGET_DIR/include -static" --extra-ldflags="-L$TARGET_DIR/lib -lm -static" --extra-version=static --disable-debug --disable-shared --enable-static --extra-cflags=--static --disable-ffplay --disable-ffserver --disable-doc --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --disable-devices
+CFLAGS="-I$TARGET_DIR/include" LDFLAGS="-L$TARGET_DIR/lib -lm" ./configure --prefix=${OUTPUT_DIR:-$TARGET_DIR} --extra-cflags="-I$TARGET_DIR/include" --extra-ldflags="-L$TARGET_DIR/lib -lm "  --disable-debug --enable-shared   --enable-gpl --enable-pthreads --enable-postproc --enable-gray --enable-runtime-cpudetect --enable-libfaac --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvorbis --enable-libx264 --enable-libxvid --enable-bzlib --enable-zlib --enable-nonfree --enable-version3 --enable-libvpx --disable-devices --enable-pic
 make -j $jval && make install
